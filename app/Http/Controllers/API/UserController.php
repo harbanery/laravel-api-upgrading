@@ -84,4 +84,35 @@ class UserController extends Controller
             ], 'Login Failed', 500);
         }
     }
+
+    public function fetch(Request $request)
+    {
+        return ResponseFormatter::success($request->user(), 'Data profile user berhasil');
+    }
+
+    public function updateProfile(Request $request)
+    {
+        try {
+            $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'username' => ['required', 'string', 'max:255', 'unique:users'],
+                'phone_number' => ['required', 'string', 'max:255'],
+            ]);
+
+            Auth::user()->update($request->all());
+
+            return ResponseFormatter::success(null, 'Data profile updated successfully');
+        } catch (Exception $error) {
+            return ResponseFormatter::error([
+                'message' => 'Something went wrong',
+                'error' => $error,
+            ], 'Data profile failed to update', 500);
+        }
+    }
+
+    public function logout(Request $request)
+    {
+        $token = $request->user()->currentAccessToken()->delete();
+        return ResponseFormatter::success($token, 'Token Revoked');
+    }
 }
